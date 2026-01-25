@@ -1,23 +1,69 @@
 // ListView Component
-export function ListView() {
+interface ListViewProps {
+  modelName?: string
+}
+
+const mockData: Record<string, any[]> = {
+  users: [
+    { id: 1, name: 'John Doe', email: 'john@example.com', created_at: '2024-01-15' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', created_at: '2024-01-16' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', created_at: '2024-01-17' },
+    { id: 4, name: 'Alice Williams', email: 'alice@example.com', created_at: '2024-01-18' },
+    { id: 5, name: 'Charlie Brown', email: 'charlie@example.com', created_at: '2024-01-19' },
+  ],
+  orders: [
+    { id: 101, user_id: 1, total: '$250.00', created_at: '2024-01-20' },
+    { id: 102, user_id: 2, total: '$150.00', created_at: '2024-01-20' },
+    { id: 103, user_id: 1, total: '$500.00', created_at: '2024-01-21' },
+    { id: 104, user_id: 3, total: '$300.00', created_at: '2024-01-21' },
+    { id: 105, user_id: 4, total: '$450.00', created_at: '2024-01-22' },
+  ],
+  products: [
+    { id: 1, name: 'Laptop', price: '$999.99', stock: 15, created_at: '2023-06-01' },
+    { id: 2, name: 'Mouse', price: '$29.99', stock: 100, created_at: '2023-06-02' },
+    { id: 3, name: 'Keyboard', price: '$79.99', stock: 50, created_at: '2023-06-03' },
+    { id: 4, name: 'Monitor', price: '$299.99', stock: 25, created_at: '2023-06-04' },
+    { id: 5, name: 'USB Cable', price: '$9.99', stock: 200, created_at: '2023-06-05' },
+  ],
+}
+
+export function ListView({ modelName = 'users' }: ListViewProps) {
+  const data = mockData[modelName] || []
+  const columns = data.length > 0 ? Object.keys(data[0]) : []
+
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
+      <table className="w-full divide-y divide-gray-200">
         <thead className="bg-gray-100">
           <tr>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Email</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Created</th>
+            {columns.map((column) => (
+              <th
+                key={column}
+                className="px-6 py-4 text-left text-sm font-semibold text-gray-900 capitalize"
+              >
+                {column.replace('_', ' ')}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          <tr className="hover:bg-gray-50">
-            <td className="px-6 py-4 text-sm text-gray-700">John Doe</td>
-            <td className="px-6 py-4 text-sm text-gray-700">john@example.com</td>
-            <td className="px-6 py-4 text-sm text-gray-700">2024-01-15</td>
-          </tr>
+          {data.map((row, idx) => (
+            <tr key={idx} className="hover:bg-gray-50 transition-colors">
+              {columns.map((column) => (
+                <td key={`${idx}-${column}`} className="px-6 py-4 text-sm text-gray-700">
+                  {String(row[column])}
+                </td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </table>
+
+      {data.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No data available</p>
+        </div>
+      )}
     </div>
   )
 }
