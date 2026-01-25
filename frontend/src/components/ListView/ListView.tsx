@@ -9,6 +9,7 @@ interface Filter {
 interface ListViewProps {
   modelName?: string
   filters?: Filter[]
+  onRowClick?: (row: Record<string, any>) => void
 }
 
 const mockData: Record<string, any[]> = {
@@ -61,7 +62,7 @@ function applyFilter(row: any, filter: Filter): boolean {
   }
 }
 
-export function ListView({ modelName = 'users', filters = [] }: ListViewProps) {
+export function ListView({ modelName = 'users', filters = [], onRowClick }: ListViewProps) {
   let data = mockData[modelName] || []
 
   // Apply filters
@@ -90,9 +91,10 @@ export function ListView({ modelName = 'users', filters = [] }: ListViewProps) {
           {data.map((row, idx) => (
             <tr
               key={idx}
-              className={`transition-colors ${
+              onClick={() => onRowClick?.(row)}
+              className={`transition-colors cursor-pointer ${
                 idx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750'
-              } hover:bg-gray-700`}
+              } hover:bg-gray-700 hover:border-l-4 hover:border-cyan-600`}
             >
               {columns.map((column) => (
                 <td

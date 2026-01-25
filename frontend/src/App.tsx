@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ListView } from './components/ListView/ListView'
 import { FilterBuilder } from './components/FilterBuilder/FilterBuilder'
 import { GroupView } from './components/GroupView/GroupView'
+import DetailView from './components/DetailView/DetailView'
 import { AppProvider } from './state/AppContext'
 
 interface Filter {
@@ -18,6 +19,8 @@ function AppContent() {
   const [showGroupView, setShowGroupView] = useState(false)
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [showGroupModal, setShowGroupModal] = useState(false)
+  const [selectedRow, setSelectedRow] = useState<Record<string, any> | null>(null)
+  const [showDetailView, setShowDetailView] = useState(false)
 
   const models = [
     {
@@ -47,6 +50,8 @@ function AppContent() {
     setShowGroupView(false)
     setShowFilterModal(false)
     setShowGroupModal(false)
+    setSelectedRow(null)
+    setShowDetailView(false)
   }
 
   const handleAddFilter = (filter: Omit<Filter, 'id'>) => {
@@ -55,6 +60,11 @@ function AppContent() {
 
   const handleRemoveFilter = (filterId: string) => {
     setFilters(filters.filter((f) => f.id !== filterId))
+  }
+
+  const handleRowClick = (row: Record<string, any>) => {
+    setSelectedRow(row)
+    setShowDetailView(true)
   }
 
   const currentModel = models.find((m) => m.name === selectedModel)
@@ -162,6 +172,7 @@ function AppContent() {
                       <ListView
                         modelName={selectedModel}
                         filters={filters}
+                        onRowClick={handleRowClick}
                       />
                     </div>
                   )}
@@ -285,6 +296,14 @@ function AppContent() {
           </div>
         </div>
       )}
+
+      {/* Detail View Slide Panel */}
+      <DetailView
+        modelName={selectedModel || ''}
+        selectedRow={selectedRow}
+        isOpen={showDetailView}
+        onClose={() => setShowDetailView(false)}
+      />
     </div>
   )
 }
