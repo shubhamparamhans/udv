@@ -85,53 +85,53 @@ export function GroupView({ modelName = 'users', groupByField = '', filters = []
   return (
     <div className="space-y-6 p-6">
       {groups.map(([groupKey, groupData]) => (
-        <div key={groupKey} className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 rounded-xl border-2 border-blue-200 shadow-md hover:shadow-lg transition-shadow">
+        <div key={groupKey} className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-bold text-gray-900 capitalize">
-              {groupByField}: <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{groupKey}</span>
+            <h3 className="text-lg font-bold text-cyan-400 capitalize">
+              {groupByField}: <span className="text-purple-400">{groupKey}</span>
             </h3>
-            <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-300">
+            <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-purple-900 text-purple-200 border border-purple-700">
               {groupData.length} item{groupData.length !== 1 ? 's' : ''}
             </span>
           </div>
 
           {/* Summary Stats */}
           <div className="grid grid-cols-2 gap-4 mb-5">
-            <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-200">
-              <p className="text-sm text-gray-600 font-semibold">Total Records</p>
-              <p className="text-3xl font-bold text-blue-600 mt-1">{groupData.length}</p>
+            <div className="bg-gray-700 p-4 rounded-lg border border-cyan-600">
+              <p className="text-sm text-gray-300 font-semibold">Total Records</p>
+              <p className="text-3xl font-bold text-cyan-400 mt-1">{groupData.length}</p>
             </div>
-            <div className="bg-gradient-to-br from-white to-indigo-50 p-4 rounded-lg border border-indigo-200">
-              <p className="text-sm text-gray-600 font-semibold">Fields</p>
-              <p className="text-3xl font-bold text-indigo-600 mt-1">{Object.keys(groupData[0] || {}).length}</p>
+            <div className="bg-gray-700 p-4 rounded-lg border border-purple-600">
+              <p className="text-sm text-gray-300 font-semibold">Fields</p>
+              <p className="text-3xl font-bold text-purple-400 mt-1">{Object.keys(groupData[0] || {}).length}</p>
             </div>
           </div>
 
           {/* Group Data Table */}
-          <div className="bg-white rounded-lg overflow-hidden border border-blue-100">
-            <table className="w-full divide-y divide-blue-100 text-sm">
-              <thead className="bg-gradient-to-r from-blue-100 to-indigo-100 border-b-2 border-blue-300">
+          <div className="bg-gray-750 rounded-lg overflow-hidden border border-gray-700">
+            <table className="w-full divide-y divide-gray-700 text-sm">
+              <thead className="bg-gray-800 border-b-2 border-cyan-600">
                 <tr>
                   {Object.keys(groupData[0] || {}).map((field) => (
                     <th
                       key={field}
-                      className="px-4 py-3 text-left text-xs font-bold text-gray-800 uppercase tracking-wider capitalize"
+                      className="px-4 py-3 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider capitalize"
                     >
                       {field.replace('_', ' ')}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-blue-100">
+              <tbody className="divide-y divide-gray-700">
                 {groupData.map((row, idx) => (
                   <tr
                     key={idx}
                     className={`transition-colors ${
-                      idx % 2 === 0 ? 'bg-white' : 'bg-blue-50'
-                    } hover:bg-blue-100`}
+                      idx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750'
+                    } hover:bg-gray-700`}
                   >
                     {Object.keys(row).map((field) => (
-                      <td key={`${idx}-${field}`} className="px-4 py-3 text-gray-700 font-medium">
+                      <td key={`${idx}-${field}`} className="px-4 py-3 text-gray-200 font-medium">
                         {String(row[field])}
                       </td>
                     ))}
@@ -144,8 +144,8 @@ export function GroupView({ modelName = 'users', groupByField = '', filters = []
       ))}
 
       {groups.length === 0 && (
-        <div className="text-center py-16 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
-          <p className="text-xl text-gray-600 font-semibold">
+        <div className="text-center py-16 bg-gray-800 rounded-lg border border-gray-700">
+          <p className="text-xl text-gray-400 font-semibold">
             {filters.length > 0 ? '🔍 No data matches the applied filters' : '📭 No data available'}
           </p>
         </div>

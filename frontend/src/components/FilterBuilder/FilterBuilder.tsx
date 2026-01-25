@@ -33,11 +33,11 @@ export function FilterBuilder({ fields, onAddFilter }: FilterBuilderProps) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-sm font-bold text-gray-800 mb-2">Field</label>
+        <label className="block text-sm font-bold text-cyan-400 mb-2">Field</label>
         <select
           value={field}
           onChange={(e) => setField(e.target.value)}
-          className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white text-gray-900 font-medium"
+          className="w-full px-3 py-2 border border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-sm bg-gray-700 text-white font-medium"
         >
           {fields.map((f) => (
             <option key={f} value={f}>
@@ -48,11 +48,11 @@ export function FilterBuilder({ fields, onAddFilter }: FilterBuilderProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-bold text-gray-800 mb-2">Operator</label>
+        <label className="block text-sm font-bold text-purple-400 mb-2">Operator</label>
         <select
           value={operator}
           onChange={(e) => setOperator(e.target.value)}
-          className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white text-gray-900 font-medium"
+          className="w-full px-3 py-2 border border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm bg-gray-700 text-white font-medium"
         >
           {operators.map((op) => (
             <option key={op.value} value={op.value}>
@@ -63,7 +63,7 @@ export function FilterBuilder({ fields, onAddFilter }: FilterBuilderProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-bold text-gray-800 mb-2">Value</label>
+        <label className="block text-sm font-bold text-cyan-400 mb-2">Value</label>
         <input
           type="text"
           placeholder="Enter filter value"
@@ -74,14 +74,14 @@ export function FilterBuilder({ fields, onAddFilter }: FilterBuilderProps) {
               handleAddFilter()
             }
           }}
-          className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white text-gray-900 font-medium"
+          className="w-full px-3 py-2 border border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-sm bg-gray-700 text-white font-medium placeholder:text-gray-500"
         />
       </div>
 
       <button
         onClick={handleAddFilter}
         disabled={!field || !operator || !value}
-        className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-md hover:shadow-lg"
+        className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-purple-600 text-white rounded-lg hover:from-cyan-500 hover:to-purple-500 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-md hover:shadow-lg"
       >
         + Add Filter
       </button>

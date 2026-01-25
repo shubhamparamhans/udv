@@ -73,31 +73,31 @@ export function ListView({ modelName = 'users', filters = [] }: ListViewProps) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full divide-y divide-blue-100">
-        <thead className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b-2 border-blue-200">
+      <table className="w-full divide-y divide-gray-700">
+        <thead className="bg-gray-800 border-b-2 border-cyan-600">
           <tr>
             {columns.map((column) => (
               <th
                 key={column}
-                className="px-6 py-4 text-left text-sm font-bold text-gray-900 capitalize"
+                className="px-6 py-4 text-left text-sm font-bold text-cyan-400 capitalize"
               >
                 {column.replace('_', ' ')}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-blue-100">
+        <tbody className="divide-y divide-gray-700">
           {data.map((row, idx) => (
             <tr
               key={idx}
               className={`transition-colors ${
-                idx % 2 === 0 ? 'bg-white' : 'bg-blue-50'
-              } hover:bg-blue-100`}
+                idx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750'
+              } hover:bg-gray-700`}
             >
               {columns.map((column) => (
                 <td
                   key={`${idx}-${column}`}
-                  className="px-6 py-4 text-sm text-gray-700"
+                  className="px-6 py-4 text-sm text-gray-200"
                 >
                   {String(row[column])}
                 </td>
@@ -108,8 +108,8 @@ export function ListView({ modelName = 'users', filters = [] }: ListViewProps) {
       </table>
 
       {data.length === 0 && (
-        <div className="text-center py-12 bg-blue-50">
-          <p className="text-gray-600 text-lg">
+        <div className="text-center py-12 bg-gray-800">
+          <p className="text-gray-400 text-lg">
             {filters.length > 0 ? '🔍 No data matches the applied filters' : '📭 No data available'}
           </p>
         </div>
