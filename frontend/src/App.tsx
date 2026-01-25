@@ -182,21 +182,21 @@ function AppContent() {
 
       {/* Filter Modal Overlay */}
       {showFilterModal && selectedModel && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg shadow-2xl border border-gray-700 max-w-md w-full mx-4">
-            <div className="border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl shadow-2xl border border-cyan-600 max-w-md w-full">
+            <div className="border-b border-gray-700 px-6 py-4 flex items-center justify-between bg-gray-800">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
                 <span className="text-cyan-400">🔍</span>
                 Filters
               </h3>
               <button
                 onClick={() => setShowFilterModal(false)}
-                className="text-gray-400 hover:text-white font-bold text-xl"
+                className="text-gray-400 hover:text-white font-bold text-xl transition"
               >
                 ✕
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 max-h-96 overflow-y-auto">
               <FilterBuilder
                 fields={currentModel?.fields || []}
                 onAddFilter={handleAddFilter}
@@ -206,11 +206,11 @@ function AppContent() {
                 <>
                   <div className="border-t border-gray-700 pt-4">
                     <h4 className="text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">Applied Filters</h4>
-                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                    <div className="space-y-2">
                       {filters.map((filter) => (
                         <div
                           key={filter.id}
-                          className="p-3 bg-gray-700 border border-gray-600 rounded-lg flex justify-between items-start hover:border-gray-500 transition"
+                          className="p-3 bg-gray-700 border border-gray-600 rounded-lg flex justify-between items-start hover:border-cyan-500 transition"
                         >
                           <div className="text-sm flex-1">
                             <p className="font-medium text-white">
@@ -237,16 +237,16 @@ function AppContent() {
 
       {/* Group By Modal Overlay */}
       {showGroupModal && selectedModel && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg shadow-2xl border border-gray-700 max-w-md w-full mx-4">
-            <div className="border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl shadow-2xl border border-purple-600 max-w-md w-full">
+            <div className="border-b border-gray-700 px-6 py-4 flex items-center justify-between bg-gray-800">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
                 <span className="text-purple-400">⊕</span>
                 Group By
               </h3>
               <button
                 onClick={() => setShowGroupModal(false)}
-                className="text-gray-400 hover:text-white font-bold text-xl"
+                className="text-gray-400 hover:text-white font-bold text-xl transition"
               >
                 ✕
               </button>
