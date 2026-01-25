@@ -1,5 +1,6 @@
-import { createContext, ReactNode, useState } from 'react'
-import type { AppState, Model, QueryState } from '../types'
+import { createContext, useState } from 'react'
+import type { ReactNode } from 'react'
+import type { AppState } from '../types'
 
 const initialState: AppState = {
   models: [],

@@ -1,9 +1,8 @@
-import { useContext, useState } from 'react'
-import { ModelExplorer } from './components/ModelExplorer/ModelExplorer'
+import { useState } from 'react'
 import { ListView } from './components/ListView/ListView'
 import { FilterBuilder } from './components/FilterBuilder/FilterBuilder'
 import { GroupView } from './components/GroupView/GroupView'
-import { AppContext, AppProvider } from './state/AppContext'
+import { AppProvider } from './state/AppContext'
 
 interface Filter {
   id: string
@@ -13,7 +12,6 @@ interface Filter {
 }
 
 function AppContent() {
-  const { state, setState } = useContext(AppContext)
   const [selectedModel, setSelectedModel] = useState<string | null>(null)
   const [filters, setFilters] = useState<Filter[]>([])
   const [groupByField, setGroupByField] = useState<string | null>(null)
