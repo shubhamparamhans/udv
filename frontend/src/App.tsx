@@ -1,34 +1,54 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { ModelExplorer } from './components/ModelExplorer/ModelExplorer'
+import { ListView } from './components/ListView/ListView'
+import { GroupView } from './components/GroupView/GroupView'
+import { FilterBuilder } from './components/FilterBuilder/FilterBuilder'
+import { AppProvider } from './state/AppContext'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <AppProvider>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <h1 className="text-3xl font-bold text-gray-900">Universal Data Viewer</h1>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-4 gap-6">
+            {/* Sidebar */}
+            <aside className="col-span-1">
+              <div className="space-y-6">
+                <section className="bg-white p-6 rounded-lg shadow">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Models</h2>
+                  <ModelExplorer />
+                </section>
+
+                <section className="bg-white p-6 rounded-lg shadow">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Filters</h2>
+                  <FilterBuilder />
+                </section>
+              </div>
+            </aside>
+
+            {/* Content Area */}
+            <div className="col-span-3 space-y-6">
+              <section className="bg-white p-6 rounded-lg shadow">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Results</h2>
+                <ListView />
+              </section>
+
+              <section className="bg-white p-6 rounded-lg shadow">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Grouped View</h2>
+                <GroupView />
+              </section>
+            </div>
+          </div>
+        </main>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </AppProvider>
   )
 }
 
