@@ -1,0 +1,29 @@
+# Go
+*.go.out
+*.out
+*.test
+/bin/
+/dist/
+
+# Node
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+postgres.pid
+.env
+.env.local
