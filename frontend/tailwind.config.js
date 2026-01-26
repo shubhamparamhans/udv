@@ -9,6 +9,7 @@ export default {
       colors: {
         gray: {
           750: '#1a202c',
+          850: '#151b28',
         },
       },
     },
