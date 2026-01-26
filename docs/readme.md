@@ -291,6 +291,65 @@ By combining:
 - Auto-generated list and tree views
 
 UDV aims to become a foundational tool for internal data exploration across modern software systems.
+
+---
+
+## 15. Future Development (Incomplete / TODO)
+
+The following features and enhancements are planned for future releases:
+
+### 15.1 🔐 Authentication
+- Add basic authentication to the portal
+- Implement authentication for API calls
+- Support for user sessions
+- JWT token-based API security
+- Role-based authentication integration
+
+### 15.2 ⚙️ Config Driven Architecture
+- Move all hardcoded values to configuration files
+- Support environment-based configurations
+- Configuration for operators, functions, and limits
+- Feature flags for gradual rollout
+- Configuration validation on startup
+
+### 15.3 📊 Data Modelling Processor (HIGH PRIORITY)
+- **Importance**: Extremely important for removing manual efforts
+- Create a processor that automatically connects to database
+- Auto-detect database schema and generate JSON models
+- Auto-discovery of table columns, types, and constraints
+- Real-time schema synchronization
+- Eliminate manual model configuration
+
+### 15.4 🚀 Single Server
+- Combine backend and frontend into a single executable
+- Embed React static assets in Go binary
+- Single port for both API and UI
+- Simplified deployment and operations
+- Reduced operational complexity
+
+### 15.5 🔑 Rule-Based Access Control (RBAC)
+- Implement role-based access control
+- Define rules for data visibility
+- Row-level security policies
+- Column-level access control
+- User group management
+
+### 15.6 🎨 Config Driven UI
+- Move UI element display logic to configuration
+- Configuration file to specify which models appear in ListView
+- Conditional rendering based on config
+- Customizable dashboard layouts
+- Dynamic field display rules
+- Eliminates need for code changes for UI modifications
+
+### 15.7 ✏️ Create/Edit Views
+- Add create functionality for new records
+- Add edit functionality to update existing data
+- Form validation and error handling
+- Bulk operations support
+- Audit trail for changes
+- Rollback/undo capabilities
+
 ```
 
 ---
