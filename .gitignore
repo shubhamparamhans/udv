@@ -27,3 +27,5 @@ Thumbs.db
 postgres.pid
 .env
 .env.local
+
+.creds
