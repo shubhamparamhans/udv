@@ -40,32 +40,6 @@ const mockData: Record<string, any[]> = {
   ],
 }
 
-function applyFilter(row: any, filter: Filter): boolean {
-  const fieldValue = String(row[filter.field]).toLowerCase()
-  const filterValue = filter.value.toLowerCase()
-
-  switch (filter.operator) {
-    case 'equals':
-      return fieldValue === filterValue
-    case 'contains':
-      return fieldValue.includes(filterValue)
-    case 'startswith':
-      return fieldValue.startsWith(filterValue)
-    case 'endswith':
-      return fieldValue.endsWith(filterValue)
-    case 'gt':
-      return parseFloat(fieldValue) > parseFloat(filterValue)
-    case 'lt':
-      return parseFloat(fieldValue) < parseFloat(filterValue)
-    case 'gte':
-      return parseFloat(fieldValue) >= parseFloat(filterValue)
-    case 'lte':
-      return parseFloat(fieldValue) <= parseFloat(filterValue)
-    default:
-      return true
-  }
-}
-
 // Helper function to detect and render different data types
 function renderCellValue(value: any): React.ReactNode {
   if (typeof value === 'string' && value.includes('%')) {
@@ -147,16 +121,17 @@ export function GroupView({ modelName = 'users', groupByField = '', filters = []
 
         if (response.error) {
           setError(response.error)
-          // Fallback to mock data
+          // Fallback to mock data on error
           setData(mockData[modelName] || [])
         } else {
-          // Use real data if available, otherwise fallback to mock data
+          // Use backend data (filtered and grouped on server)
           if (response.data && response.data.length > 0) {
             setData(response.data)
             console.log('Grouped data from backend:', response.data)
           } else {
-            setData(mockData[modelName] || [])
-            console.log('Using mock data (no backend results)')
+            // No results from backend query (filters applied server-side)
+            setData([])
+            console.log('No results from backend query')
           }
           console.log('Generated GROUP BY SQL:', response.sql)
           console.log('Parameters:', response.params)
@@ -164,8 +139,8 @@ export function GroupView({ modelName = 'users', groupByField = '', filters = []
       } catch (err) {
         console.error('Error fetching grouped data:', err)
         setError(err instanceof Error ? err.message : 'Failed to load grouped data')
-        // Fallback to mock data
-        setData(mockData[modelName] || [])
+        // On error, show empty state
+        setData([])
       } finally {
         setLoading(false)
       }
@@ -177,13 +152,6 @@ export function GroupView({ modelName = 'users', groupByField = '', filters = []
   }, [modelName, groupByField, filters])
 
   let displayData = data
-
-  // Apply filters if not using backend (fallback)
-  if (displayData.length === 0 && filters.length > 0) {
-    displayData = mockData[modelName]?.filter((row) =>
-      filters.every((filter) => applyFilter(row, filter))
-    ) || []
-  }
 
   // Group data
   const grouped: Record<string, any[]> = {}

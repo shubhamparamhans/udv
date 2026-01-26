@@ -87,16 +87,17 @@ export function ListView({ modelName = 'users', filters = [], modelFields = [], 
 
         if (response.error) {
           setError(response.error)
-          // Fallback to mock data
+          // Fallback to mock data on error
           setData(mockData[modelName] || [])
         } else {
-          // Use real data if available, otherwise fallback to mock data
+          // Use backend data (filtered on server)
           if (response.data && response.data.length > 0) {
             setData(response.data)
             console.log('Data from backend:', response.data)
           } else {
-            setData(mockData[modelName] || [])
-            console.log('Using mock data (no backend results)')
+            // No results from backend query (filters applied server-side)
+            setData([])
+            console.log('No results from backend query')
           }
           console.log('Generated SQL:', response.sql)
           console.log('Parameters:', response.params)

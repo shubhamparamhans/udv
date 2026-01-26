@@ -298,6 +298,11 @@ UDV aims to become a foundational tool for internal data exploration across mode
 
 The following features and enhancements are planned for future releases:
 
+### 15.0 Pagination & Sorting
+- Adding sorting and pagination logic
+- Pagination mightbe present in backend need to add support in frontend
+- Sorting should be as simple as clicking on header for sorting in asceding or desc order.
+
 ### 15.1 🔐 Authentication
 - Add basic authentication to the portal
 - Implement authentication for API calls
