@@ -1,11 +1,11 @@
 
-# Universal Data Viewer (UDV)
+# Agent P
 
 ## 1. Overview
 
-Universal Data Viewer (UDV) is a lightweight, self-hosted framework designed to provide fast, intuitive, and zero-boilerplate exploration of structured data.  
+Agent P is a lightweight, self-hosted framework designed to provide fast, intuitive, and zero-boilerplate exploration of structured data.  
 
-The project is inspired by the simplicity and power of Odoo’s list and tree views, combined with the flexibility of modern web stacks. UDV focuses on **data understanding first**, not CRUD workflows or dashboards.
+The project is inspired by the simplicity and power of Odoo's list and tree views, combined with the flexibility of modern web stacks. Agent P focuses on **data understanding first**, not CRUD workflows or dashboards.
 
 The core idea is to allow developers to:
 - Define data models and relationships once
@@ -35,13 +35,13 @@ Odoo demonstrates that:
 - Grouping + filtering covers most exploratory needs
 - ORM-level relationship awareness is critical
 
-UDV extracts these ideas into a **framework-agnostic, developer-first tool**.
+Agent P extracts these ideas into a **framework-agnostic, developer-first tool**.
 
 ---
 
 ## 3. Product Vision
 
-UDV aims to be:
+Agent P aims to be:
 
 - **Universal** – works with multiple databases
 - **Config-driven** – no UI or model code required initially
@@ -112,7 +112,7 @@ React Frontend
 
 ### 7.1 Config-Driven Modeling
 
-Instead of defining models in code, UDV uses declarative configuration files.
+Instead of defining models in code, Agent P uses declarative configuration files.
 
 These definitions describe:
 - Tables / collections
@@ -142,7 +142,7 @@ The system understands how to:
 
 ### 7.3 Query Abstraction
 
-UDV avoids raw SQL in application logic.
+Agent P avoids raw SQL in application logic.
 
 Queries are defined as structured objects:
 - Filters
@@ -283,14 +283,14 @@ Advanced permission systems are deferred.
 
 ## 14. Summary
 
-Universal Data Viewer is a developer-first framework focused on **making data understandable with minimal effort**.
+Agent P is a developer-first framework focused on **making data understandable with minimal effort**.
 
 By combining:
 - Config-driven modeling
 - Relationship-aware querying
 - Auto-generated list and tree views
 
-UDV aims to become a foundational tool for internal data exploration across modern software systems.
+Agent P aims to become a foundational tool for internal data exploration across modern software systems.
 
 ---
 
