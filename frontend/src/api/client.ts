@@ -16,6 +16,12 @@ export interface QueryResponse {
   params: any[]
   data?: any[]
   error?: string
+  total?: number
+  meta?: {
+    total: number
+    limit: number
+    offset: number
+  }
 }
 
 export async function fetchModels(): Promise<Model[]> {
@@ -44,13 +50,62 @@ export interface Filter {
   value: any
 }
 
+export interface Sort {
+  field: string
+  direction: 'asc' | 'desc'
+}
+
+/**
+ * Builds a search filter (OR filter across multiple fields)
+ */
+export function buildSearchQuery(
+  searchTerm: string,
+  searchFields: string[],
+  operator: string = 'contains'
+): any | null {
+  if (!searchTerm || searchTerm.trim() === '' || searchFields.length === 0) {
+    return null
+  }
+
+  // Build OR filter across all search fields
+  const orFilters = searchFields.map((field) => ({
+    field,
+    op: operator,
+    value: searchTerm.trim(),
+  }))
+
+  return {
+    or: orFilters,
+  }
+}
+
+/**
+ * Gets searchable fields from model (string/text types only)
+ */
+export function getSearchableFields(model: Model): string[] {
+  return model.fields
+    .filter((field) => {
+      const type = field.type.toLowerCase()
+      return (
+        type === 'string' ||
+        type === 'text' ||
+        type === 'varchar' ||
+        type === 'char' ||
+        type.includes('text')
+      )
+    })
+    .map((field) => field.name)
+}
+
 export function buildDSLQuery(
   modelName: string,
   fields?: string[],
   filters?: Filter[],
   groupByField?: string,
   limit: number = 100,
-  offset: number = 0
+  offset: number = 0,
+  sort?: Sort[],
+  searchFilter?: any // OR filter from search
 ): any {
   const query: any = {
     model: modelName,
@@ -61,22 +116,49 @@ export function buildDSLQuery(
     query.fields = fields
   }
 
+  // Combine search filter with existing filters
+  const allFilters: any[] = []
+
+  // Add search filter if exists
+  if (searchFilter) {
+    allFilters.push(searchFilter)
+  }
+
+  // Add existing filters
   if (filters && filters.length > 0) {
     if (filters.length === 1) {
-      query.filters = {
+      allFilters.push({
         field: filters[0].field,
         op: filters[0].op,
         value: filters[0].value,
-      }
+      })
     } else {
-      query.filters = {
+      allFilters.push({
         and: filters.map((f) => ({
           field: f.field,
           op: f.op,
           value: f.value,
         })),
+      })
+    }
+  }
+
+  // Set filters in query
+  if (allFilters.length > 0) {
+    if (allFilters.length === 1) {
+      query.filters = allFilters[0]
+    } else {
+      query.filters = {
+        and: allFilters,
       }
     }
+  }
+
+  if (sort && sort.length > 0) {
+    query.sort = sort.map((s) => ({
+      field: s.field,
+      direction: s.direction,
+    }))
   }
 
   if (groupByField) {

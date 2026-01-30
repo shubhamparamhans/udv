@@ -1,6 +1,13 @@
 // ListView Component
-import { useState, useEffect } from 'react'
-import { executeQuery, buildDSLQuery, type QueryResponse } from '../../api/client'
+import React, { useState, useEffect } from 'react'
+import {
+  executeQuery,
+  buildDSLQuery,
+  buildSearchQuery,
+  type QueryResponse,
+  type Sort,
+} from '../../api/client'
+import { Pagination } from '../Pagination/Pagination'
 
 interface Filter {
   id: string
@@ -14,6 +21,8 @@ interface ListViewProps {
   filters?: Filter[]
   modelFields?: string[]
   onRowClick?: (row: Record<string, any>) => void
+  searchQuery?: string
+  searchFields?: string[]
 }
 
 const mockData: Record<string, any[]> = {
@@ -54,12 +63,28 @@ function convertOperator(operator: string): string {
   return mapping[operator] || operator
 }
 
-export function ListView({ modelName = 'users', filters = [], modelFields = [], onRowClick }: ListViewProps) {
+export function ListView({
+  modelName = 'users',
+  filters = [],
+  modelFields = [],
+  onRowClick,
+  searchQuery = '',
+  searchFields = [],
+}: ListViewProps) {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(25)
+  const [totalCount, setTotalCount] = useState(0)
+  const [sort, setSort] = useState<Sort | null>(null)
 
-  // Fetch data when model or filters change
+  // Reset to page 1 when model, filters, sort, or search changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [modelName, filters, sort, searchQuery])
+
+  // Fetch data when model, filters, pagination, sort, or search changes
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -73,13 +98,27 @@ export function ListView({ modelName = 'users', filters = [], modelFields = [], 
           value: isNaN(Number(f.value)) ? f.value : Number(f.value),
         }))
 
+        // Build search filter if search query exists
+        const searchFilter =
+          searchQuery && searchFields.length > 0
+            ? buildSearchQuery(searchQuery, searchFields, 'contains')
+            : null
+
+        // Calculate offset from current page
+        const offset = (currentPage - 1) * pageSize
+
+        // Build sort array if sort is set
+        const sortArray = sort ? [sort] : undefined
+
         const query = buildDSLQuery(
           modelName,
           modelFields.length > 0 ? modelFields : undefined,
           dslFilters.length > 0 ? dslFilters : undefined,
           undefined,
-          100,
-          0
+          pageSize,
+          offset,
+          sortArray,
+          searchFilter
         )
 
         // Execute query via backend
@@ -88,15 +127,27 @@ export function ListView({ modelName = 'users', filters = [], modelFields = [], 
         if (response.error) {
           setError(response.error)
           // Fallback to mock data on error
-          setData(mockData[modelName] || [])
+          const mockDataArray = mockData[modelName] || []
+          setData(mockDataArray)
+          setTotalCount(mockDataArray.length)
         } else {
           // Use backend data (filtered on server)
           if (response.data && response.data.length > 0) {
             setData(response.data)
+            // Use meta.total if available, otherwise estimate from data length
+            if (response.meta?.total !== undefined) {
+              setTotalCount(response.meta.total)
+            } else if (response.total !== undefined) {
+              setTotalCount(response.total)
+            } else {
+              // Estimate: if we got a full page, there might be more
+              setTotalCount(response.data.length === pageSize ? response.data.length + 1 : response.data.length)
+            }
             console.log('Data from backend:', response.data)
           } else {
             // No results from backend query (filters applied server-side)
             setData([])
+            setTotalCount(0)
             console.log('No results from backend query')
           }
           console.log('Generated SQL:', response.sql)
@@ -106,75 +157,148 @@ export function ListView({ modelName = 'users', filters = [], modelFields = [], 
         console.error('Error fetching data:', err)
         setError(err instanceof Error ? err.message : 'Failed to load data')
         // Fallback to mock data
-        setData(mockData[modelName] || [])
+        const mockDataArray = mockData[modelName] || []
+        setData(mockDataArray)
+        setTotalCount(mockDataArray.length)
       } finally {
         setLoading(false)
       }
     }
 
     fetchData()
-  }, [modelName, filters, modelFields])
+  }, [modelName, filters, modelFields, currentPage, pageSize, sort, searchQuery, searchFields])
+
+  const handleSort = (field: string) => {
+    if (sort && sort.field === field) {
+      // Toggle direction if same field
+      setSort(sort.direction === 'asc' ? { field, direction: 'desc' } : null)
+    } else {
+      // New field, default to ascending
+      setSort({ field, direction: 'asc' })
+    }
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    // Scroll to top of table
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size)
+    setCurrentPage(1) // Reset to first page when page size changes
+  }
 
   const columns = data.length > 0 ? Object.keys(data[0]) : modelFields.length > 0 ? modelFields : []
 
+  const getSortIndicator = (column: string) => {
+    if (sort && sort.field === column) {
+      return sort.direction === 'asc' ? ' ↑' : ' ↓'
+    }
+    return ''
+  }
+
+  // Highlight search matches in text
+  const highlightMatch = (text: string, searchTerm: string): React.ReactNode => {
+    if (!searchTerm || !text) return String(text)
+
+    const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi')
+    const parts = String(text).split(regex)
+
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <mark key={i} className="bg-yellow-600 text-yellow-100 px-1 rounded">
+          {part}
+        </mark>
+      ) : (
+        <span key={i}>{part}</span>
+      )
+    )
+  }
+
   return (
-    <div className="overflow-x-auto">
-      {loading && (
-        <div className="text-center py-8 text-gray-400">
-          <span className="inline-block animate-spin mr-2">⚙️</span>
-          Loading data...
-        </div>
-      )}
+    <div className="flex flex-col">
+      <div className="overflow-x-auto">
+        {loading && (
+          <div className="text-center py-8 text-gray-400">
+            <span className="inline-block animate-spin mr-2">⚙️</span>
+            Loading data...
+          </div>
+        )}
 
-      {error && (
-        <div className="p-4 bg-red-900 bg-opacity-20 border border-red-700 text-red-300 rounded">
-          ⚠️ {error}
-        </div>
-      )}
+        {error && (
+          <div className="p-4 bg-red-900 bg-opacity-20 border border-red-700 text-red-300 rounded">
+            ⚠️ {error}
+          </div>
+        )}
 
-      {!loading && !error && (
-        <table className="w-full divide-y divide-gray-700">
-          <thead className="bg-gray-800 border-b-2 border-cyan-600">
-            <tr>
-              {columns.map((column) => (
-                <th
-                  key={column}
-                  className="px-6 py-4 text-left text-sm font-bold text-cyan-400 capitalize"
-                >
-                  {column.replace('_', ' ')}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-700">
-            {data.map((row, idx) => (
-              <tr
-                key={idx}
-                onClick={() => onRowClick?.(row)}
-                className={`transition-colors cursor-pointer ${
-                  idx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750'
-                } hover:bg-gray-700 hover:border-l-4 hover:border-cyan-600`}
-              >
+        {!loading && !error && (
+          <table className="w-full divide-y divide-gray-700">
+            <thead className="bg-gray-800 border-b-2 border-cyan-600">
+              <tr>
                 {columns.map((column) => (
-                  <td
-                    key={`${idx}-${column}`}
-                    className="px-6 py-4 text-sm text-gray-200"
+                  <th
+                    key={column}
+                    onClick={() => handleSort(column)}
+                    className="px-6 py-4 text-left text-sm font-bold text-cyan-400 capitalize cursor-pointer hover:bg-gray-700 transition-colors select-none"
+                    title="Click to sort"
                   >
-                    {String(row[column])}
-                  </td>
+                    <span className="flex items-center gap-2">
+                      {column.replace('_', ' ')}
+                      <span className="text-xs">
+                        {getSortIndicator(column) || (
+                          <span className="text-gray-600 opacity-50">↕</span>
+                        )}
+                      </span>
+                    </span>
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody className="divide-y divide-gray-700">
+              {data.map((row, idx) => (
+                <tr
+                  key={idx}
+                  onClick={() => onRowClick?.(row)}
+                  className={`transition-colors cursor-pointer ${
+                    idx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750'
+                  } hover:bg-gray-700 hover:border-l-4 hover:border-cyan-600`}
+                >
+                  {columns.map((column) => (
+                    <td
+                      key={`${idx}-${column}`}
+                      className="px-6 py-4 text-sm text-gray-200"
+                    >
+                      {searchQuery && searchFields.includes(column)
+                        ? highlightMatch(String(row[column] ?? ''), searchQuery)
+                        : String(row[column] ?? '')}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
 
-      {!loading && !error && data.length === 0 && (
-        <div className="text-center py-12 bg-gray-800">
-          <p className="text-gray-400 text-lg">
-            {filters.length > 0 ? '🔍 No data matches the applied filters' : '📭 No data available'}
-          </p>
-        </div>
+        {!loading && !error && data.length === 0 && (
+          <div className="text-center py-12 bg-gray-800">
+            <p className="text-gray-400 text-lg">
+              {filters.length > 0 ? '🔍 No data matches the applied filters' : '📭 No data available'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Pagination */}
+      {!loading && !error && totalCount > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       )}
     </div>
   )
