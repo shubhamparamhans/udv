@@ -30,7 +30,11 @@ export function DataViewer() {
   const [selectedRow, setSelectedRow] = useState<Record<string, any> | null>(null)
   const [showDetailView, setShowDetailView] = useState(false)
   const [searchInput, setSearchInput] = useState<string>('')
+  const [searchMode, setSearchMode] = useState<'global' | 'column'>('global')
+  const [selectedSearchColumn, setSelectedSearchColumn] = useState<string>('')
+  const [columnSearchInput, setColumnSearchInput] = useState<string>('')
   const debouncedSearchQuery = useDebounce(searchInput, 500)
+  const debouncedColumnSearchQuery = useDebounce(columnSearchInput, 500)
 
   // Fetch models on component mount
   useEffect(() => {
@@ -78,6 +82,11 @@ export function DataViewer() {
 
   const handleClearSearch = () => {
     setSearchInput('')
+  }
+
+  const handleClearColumnSearch = () => {
+    setColumnSearchInput('')
+    setSelectedSearchColumn('')
   }
 
   const currentModel = models.find((m) => m.name === selectedModel)
@@ -137,18 +146,6 @@ export function DataViewer() {
               </button>
             </div>
           </div>
-          {selectedModel && (
-            <div className="max-w-md">
-              <SearchBar
-                value={searchInput}
-                onChange={setSearchInput}
-                onClear={handleClearSearch}
-                placeholder={`Search ${selectedModel}...`}
-                disabled={!selectedModel}
-                loading={false}
-              />
-            </div>
-          )}
         </div>
       </header>
 
@@ -231,12 +228,90 @@ export function DataViewer() {
 
                   {/* Data Display */}
                   <div className="flex-1 overflow-y-auto p-6">
+                    {/* Search Bar Above Table */}
+                    {selectedModel && (
+                      <div className="mb-4 bg-gray-800 rounded-lg p-4 border border-gray-700">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm text-gray-300 font-medium">Search Mode:</label>
+                            <select
+                              value={searchMode}
+                              onChange={(e) => {
+                                setSearchMode(e.target.value as 'global' | 'column')
+                                if (e.target.value === 'global') {
+                                  setColumnSearchInput('')
+                                  setSelectedSearchColumn('')
+                                } else {
+                                  setSearchInput('')
+                                }
+                              }}
+                              className="px-3 py-1 bg-gray-700 border border-gray-600 text-white rounded-lg text-sm 
+                                focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-20"
+                            >
+                              <option value="global">Global (All Fields)</option>
+                              <option value="column">Column Specific</option>
+                            </select>
+                          </div>
+
+                          {searchMode === 'global' ? (
+                            <div className="flex-1 max-w-md">
+                              <SearchBar
+                                value={searchInput}
+                                onChange={setSearchInput}
+                                onClear={handleClearSearch}
+                                placeholder={`Search across all fields in ${selectedModel}...`}
+                                disabled={!selectedModel}
+                                loading={false}
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex-1 flex items-center gap-2">
+                              <select
+                                value={selectedSearchColumn}
+                                onChange={(e) => {
+                                  setSelectedSearchColumn(e.target.value)
+                                  setColumnSearchInput('')
+                                }}
+                                className="px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg text-sm 
+                                  focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-20"
+                              >
+                                <option value="">Select column...</option>
+                                {currentModelFields.map((field) => (
+                                  <option key={field} value={field}>
+                                    {field.replace('_', ' ')}
+                                  </option>
+                                ))}
+                              </select>
+                              {selectedSearchColumn && (
+                                <div className="flex-1 max-w-md">
+                                  <SearchBar
+                                    value={columnSearchInput}
+                                    onChange={setColumnSearchInput}
+                                    onClear={() => {
+                                      setColumnSearchInput('')
+                                      setSelectedSearchColumn('')
+                                    }}
+                                    placeholder={`Search in ${selectedSearchColumn.replace('_', ' ')}...`}
+                                    disabled={!selectedSearchColumn}
+                                    loading={false}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {showGroupView && groupByField ? (
                       <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-700">
                         <GroupView
                           modelName={selectedModel}
                           groupByField={groupByField}
                           filters={filters}
+                          searchQuery={searchMode === 'global' ? debouncedSearchQuery : ''}
+                          columnSearchQuery={searchMode === 'column' && selectedSearchColumn ? debouncedColumnSearchQuery : ''}
+                          columnSearchField={searchMode === 'column' ? selectedSearchColumn : ''}
                         />
                       </div>
                     ) : (
@@ -246,8 +321,10 @@ export function DataViewer() {
                           filters={filters}
                           modelFields={currentModelFields}
                           onRowClick={handleRowClick}
-                          searchQuery={debouncedSearchQuery}
+                          searchQuery={searchMode === 'global' ? debouncedSearchQuery : ''}
                           searchFields={searchableFields}
+                          columnSearchQuery={searchMode === 'column' && selectedSearchColumn ? debouncedColumnSearchQuery : ''}
+                          columnSearchField={searchMode === 'column' ? selectedSearchColumn : ''}
                         />
                       </div>
                     )}

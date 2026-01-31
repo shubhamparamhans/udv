@@ -1,7 +1,7 @@
 // GroupView Component
 import { useState, useEffect } from 'react'
 import type React from 'react'
-import { executeQuery, buildDSLQuery, type QueryResponse } from '../../api/client'
+import { executeQuery, buildDSLQuery, buildSearchQuery, type QueryResponse } from '../../api/client'
 
 interface Filter {
   id: string
@@ -14,6 +14,9 @@ interface GroupViewProps {
   modelName?: string
   groupByField?: string
   filters?: Filter[]
+  searchQuery?: string
+  columnSearchQuery?: string
+  columnSearchField?: string
 }
 
 const mockData: Record<string, any[]> = {
@@ -87,7 +90,14 @@ function convertOperator(operator: string): string {
   return mapping[operator] || operator
 }
 
-export function GroupView({ modelName = 'users', groupByField = '', filters = [] }: GroupViewProps) {
+export function GroupView({
+  modelName = 'users',
+  groupByField = '',
+  filters = [],
+  searchQuery = '',
+  columnSearchQuery = '',
+  columnSearchField = '',
+}: GroupViewProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -100,19 +110,47 @@ export function GroupView({ modelName = 'users', groupByField = '', filters = []
         setLoading(true)
         setError(null)
 
-        // Build DSL query with GROUP BY
+        // Build DSL query - fetch all rows (not grouped) so we can show individual rows
         const dslFilters = filters.map((f) => ({
           field: f.field,
           op: convertOperator(f.operator),
           value: isNaN(Number(f.value)) ? f.value : Number(f.value),
         }))
 
+        // Add search filter if exists
+        let searchFilter = null
+        if (columnSearchQuery && columnSearchField) {
+          // Column-specific search
+          searchFilter = {
+            field: columnSearchField,
+            op: 'contains',
+            value: columnSearchQuery.trim(),
+          }
+        } else if (searchQuery) {
+          // For global search in group view, we'll search in the groupByField if it's a string field
+          // In a full implementation, you'd want to get all searchable fields
+          if (groupByField) {
+            searchFilter = {
+              field: groupByField,
+              op: 'contains',
+              value: searchQuery.trim(),
+            }
+          }
+        }
+
+        // Combine filters
+        const allFilters = dslFilters.length > 0 ? [...dslFilters] : []
+        if (searchFilter) {
+          allFilters.push(searchFilter)
+        }
+
+        // Build query WITHOUT groupBy - we'll group on frontend to show individual rows
         const query = buildDSLQuery(
           modelName,
-          undefined,
-          dslFilters.length > 0 ? dslFilters : undefined,
-          groupByField,
-          100,
+          undefined, // Get all fields
+          allFilters.length > 0 ? allFilters : undefined,
+          undefined, // Don't group in query - group on frontend
+          1000, // Get more rows for grouping
           0
         )
 
@@ -149,7 +187,7 @@ export function GroupView({ modelName = 'users', groupByField = '', filters = []
     if (groupByField) {
       fetchData()
     }
-  }, [modelName, groupByField, filters])
+  }, [modelName, groupByField, filters, searchQuery, columnSearchQuery, columnSearchField])
 
   let displayData = data
 

@@ -23,6 +23,8 @@ interface ListViewProps {
   onRowClick?: (row: Record<string, any>) => void
   searchQuery?: string
   searchFields?: string[]
+  columnSearchQuery?: string
+  columnSearchField?: string
 }
 
 const mockData: Record<string, any[]> = {
@@ -70,6 +72,8 @@ export function ListView({
   onRowClick,
   searchQuery = '',
   searchFields = [],
+  columnSearchQuery = '',
+  columnSearchField = '',
 }: ListViewProps) {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -98,11 +102,19 @@ export function ListView({
           value: isNaN(Number(f.value)) ? f.value : Number(f.value),
         }))
 
-        // Build search filter if search query exists
-        const searchFilter =
-          searchQuery && searchFields.length > 0
-            ? buildSearchQuery(searchQuery, searchFields, 'contains')
-            : null
+        // Build search filter - either global or column-specific
+        let searchFilter = null
+        if (columnSearchQuery && columnSearchField) {
+          // Column-specific search
+          searchFilter = {
+            field: columnSearchField,
+            op: 'contains',
+            value: columnSearchQuery.trim(),
+          }
+        } else if (searchQuery && searchFields.length > 0) {
+          // Global search across multiple fields
+          searchFilter = buildSearchQuery(searchQuery, searchFields, 'contains')
+        }
 
         // Calculate offset from current page
         const offset = (currentPage - 1) * pageSize
@@ -166,7 +178,7 @@ export function ListView({
     }
 
     fetchData()
-  }, [modelName, filters, modelFields, currentPage, pageSize, sort, searchQuery, searchFields])
+  }, [modelName, filters, modelFields, currentPage, pageSize, sort, searchQuery, searchFields, columnSearchQuery, columnSearchField])
 
   const handleSort = (field: string) => {
     if (sort && sort.field === field) {
@@ -270,8 +282,12 @@ export function ListView({
                       key={`${idx}-${column}`}
                       className="px-6 py-4 text-sm text-gray-200"
                     >
-                      {searchQuery && searchFields.includes(column)
-                        ? highlightMatch(String(row[column] ?? ''), searchQuery)
+                      {(searchQuery && searchFields.includes(column)) || 
+                       (columnSearchQuery && columnSearchField === column)
+                        ? highlightMatch(
+                            String(row[column] ?? ''),
+                            searchQuery || columnSearchQuery
+                          )
                         : String(row[column] ?? '')}
                     </td>
                   ))}

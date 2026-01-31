@@ -119,7 +119,7 @@ export function buildDSLQuery(
   // Combine search filter with existing filters
   const allFilters: any[] = []
 
-  // Add search filter if exists
+  // Add search filter if exists (can be OR filter for global or single field filter for column)
   if (searchFilter) {
     allFilters.push(searchFilter)
   }
