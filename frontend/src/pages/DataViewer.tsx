@@ -5,6 +5,9 @@ import { FilterBuilder } from '../components/FilterBuilder/FilterBuilder'
 import { GroupView } from '../components/GroupView/GroupView'
 import DetailView from '../components/DetailView/DetailView'
 import { SearchBar } from '../components/SearchBar/SearchBar'
+import { CreateForm } from '../components/CreateForm/CreateForm'
+import { EditForm } from '../components/EditForm/EditForm'
+import { DeleteConfirm } from '../components/DeleteConfirm/DeleteConfirm'
 import { fetchModels, getSearchableFields, type Model } from '../api/client'
 import { useDebounce } from '../hooks/useDebounce'
 import { useAuth } from '../contexts/AuthContext'
@@ -35,6 +38,15 @@ export function DataViewer() {
   const [columnSearchInput, setColumnSearchInput] = useState<string>('')
   const debouncedSearchQuery = useDebounce(searchInput, 500)
   const debouncedColumnSearchQuery = useDebounce(columnSearchInput, 500)
+  
+  // CRUD state
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [showEditForm, setShowEditForm] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [recordToEdit, setRecordToEdit] = useState<Record<string, any> | null>(null)
+  const [recordToDelete, setRecordToDelete] = useState<Record<string, any> | null>(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   // Fetch models on component mount
   useEffect(() => {
@@ -89,6 +101,44 @@ export function DataViewer() {
     setSelectedSearchColumn('')
   }
 
+  // CRUD handlers
+  const handleCreate = () => {
+    setShowCreateForm(true)
+  }
+
+  const handleCreateSuccess = () => {
+    setShowCreateForm(false)
+    setSuccessMessage('Record created successfully!')
+    setRefreshTrigger((prev) => prev + 1)
+    setTimeout(() => setSuccessMessage(null), 3000)
+  }
+
+  const handleEdit = (row: Record<string, any>) => {
+    setRecordToEdit(row)
+    setShowEditForm(true)
+  }
+
+  const handleEditSuccess = () => {
+    setShowEditForm(false)
+    setRecordToEdit(null)
+    setSuccessMessage('Record updated successfully!')
+    setRefreshTrigger((prev) => prev + 1)
+    setTimeout(() => setSuccessMessage(null), 3000)
+  }
+
+  const handleDelete = (row: Record<string, any>) => {
+    setRecordToDelete(row)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleDeleteSuccess = () => {
+    setShowDeleteConfirm(false)
+    setRecordToDelete(null)
+    setSuccessMessage('Record deleted successfully!')
+    setRefreshTrigger((prev) => prev + 1)
+    setTimeout(() => setSuccessMessage(null), 3000)
+  }
+
   const currentModel = models.find((m) => m.name === selectedModel)
 
   // Extract field names from model
@@ -116,6 +166,13 @@ export function DataViewer() {
               )}
               {selectedModel && (
                 <div className="flex gap-3">
+                  <button
+                    onClick={handleCreate}
+                    className="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all bg-green-600 text-white hover:bg-green-700 shadow-lg"
+                    title="Create new record"
+                  >
+                    ➕ Create
+                  </button>
                   <button
                     onClick={() => setShowFilterModal(!showFilterModal)}
                     className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all ${
@@ -325,6 +382,10 @@ export function DataViewer() {
                           searchFields={searchableFields}
                           columnSearchQuery={searchMode === 'column' && selectedSearchColumn ? debouncedColumnSearchQuery : ''}
                           columnSearchField={searchMode === 'column' ? selectedSearchColumn : ''}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                          primaryKey={currentModel?.primary_key || 'id'}
+                          key={refreshTrigger}
                         />
                       </div>
                     )}
@@ -454,6 +515,51 @@ export function DataViewer() {
         isOpen={showDetailView}
         onClose={() => setShowDetailView(false)}
       />
+
+      {/* Success Message Notification */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-xl z-50 flex items-center gap-3 animate-slide-in">
+          <span className="text-2xl">✅</span>
+          <span className="font-semibold">{successMessage}</span>
+        </div>
+      )}
+
+      {/* Create Form Modal */}
+      {showCreateForm && selectedModel && (
+        <CreateForm
+          modelName={selectedModel}
+          onSuccess={handleCreateSuccess}
+          onCancel={() => setShowCreateForm(false)}
+        />
+      )}
+
+      {/* Edit Form Modal */}
+      {showEditForm && selectedModel && recordToEdit && currentModel && (
+        <EditForm
+          modelName={selectedModel}
+          recordId={recordToEdit[currentModel.primary_key] || recordToEdit.id}
+          initialData={recordToEdit}
+          onSuccess={handleEditSuccess}
+          onCancel={() => {
+            setShowEditForm(false)
+            setRecordToEdit(null)
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && selectedModel && recordToDelete && currentModel && (
+        <DeleteConfirm
+          modelName={selectedModel}
+          recordId={recordToDelete[currentModel.primary_key] || recordToDelete.id}
+          recordData={recordToDelete}
+          onSuccess={handleDeleteSuccess}
+          onCancel={() => {
+            setShowDeleteConfirm(false)
+            setRecordToDelete(null)
+          }}
+        />
+      )}
     </div>
   )
 }

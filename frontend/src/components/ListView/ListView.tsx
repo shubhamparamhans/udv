@@ -25,6 +25,9 @@ interface ListViewProps {
   searchFields?: string[]
   columnSearchQuery?: string
   columnSearchField?: string
+  onEdit?: (row: Record<string, any>) => void
+  onDelete?: (row: Record<string, any>) => void
+  primaryKey?: string
 }
 
 const mockData: Record<string, any[]> = {
@@ -74,6 +77,9 @@ export function ListView({
   searchFields = [],
   columnSearchQuery = '',
   columnSearchField = '',
+  onEdit,
+  onDelete,
+  primaryKey = 'id',
 }: ListViewProps) {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -266,21 +272,26 @@ export function ListView({
                     </span>
                   </th>
                 ))}
+                {(onEdit || onDelete) && (
+                  <th className="px-6 py-4 text-left text-sm font-bold text-cyan-400">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
               {data.map((row, idx) => (
                 <tr
                   key={idx}
-                  onClick={() => onRowClick?.(row)}
-                  className={`transition-colors cursor-pointer ${
+                  className={`transition-colors ${
                     idx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750'
-                  } hover:bg-gray-700 hover:border-l-4 hover:border-cyan-600`}
+                  } hover:bg-gray-700`}
                 >
                   {columns.map((column) => (
                     <td
                       key={`${idx}-${column}`}
-                      className="px-6 py-4 text-sm text-gray-200"
+                      onClick={() => onRowClick?.(row)}
+                      className="px-6 py-4 text-sm text-gray-200 cursor-pointer"
                     >
                       {(searchQuery && searchFields.includes(column)) || 
                        (columnSearchQuery && columnSearchField === column)
@@ -291,6 +302,33 @@ export function ListView({
                         : String(row[column] ?? '')}
                     </td>
                   ))}
+                  {(onEdit || onDelete) && (
+                    <td
+                      className="px-6 py-4 text-sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center gap-2">
+                        {onEdit && (
+                          <button
+                            onClick={() => onEdit(row)}
+                            className="px-3 py-1 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition-colors text-xs font-semibold"
+                            title="Edit record"
+                          >
+                            ✏️ Edit
+                          </button>
+                        )}
+                        {onDelete && (
+                          <button
+                            onClick={() => onDelete(row)}
+                            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-xs font-semibold"
+                            title="Delete record"
+                          >
+                            🗑️ Delete
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
